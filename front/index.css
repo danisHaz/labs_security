@@ -39,3 +39,24 @@ textarea{
 }
 
 
+#messages{
+    width: 100%;
+    height: 30vh;
+
+    overflow: scroll;
+    border: 1px solid black;
+}
+
+.message{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex-wrap: wrap;
+
+    width: 50%;
+    border: 3px solid blue;
+    border-radius: 10px;
+    padding: 0.4rem;
+    margin: 0.4rem;
+}
+
