@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index.css">
+    <title>Caesar</title>
+</head>
+<body>
+    <main>
+        <!-- <div class="language">
+            <p>Выберите язык:</p>
+            <select id="language">
+                <option value="ENG">ENG</option>
+                <option value="RUS">RUS</option>
+            </select>
+        </div> -->
+        <div className="inputText" class="text">
+            <p>Загрузить текст из файла:</p>
+            <input type="file" id="file"></input>
+        </div>
+        <div class="key">
+            <p>Введите ключ:</p>
+            <textarea  id="key" cols="10" rows="2"></textarea>
+        </div>
+        <div class="text">
+            <p>Введите текст для шифрования/расшифрования:</p>
+            <textarea id="text" cols="60" rows="5"></textarea>
+        </div>
+        <div class="text">
+            <p>Результат:</p>
+            <textarea id="textCrypt" cols="60" rows="5"></textarea>
+        </div>
+        <button class="btn" id="crypt">
+            Зашифровать
+        </button>
+        <button class="btn" id="encrypt">
+            Расшифровать
+        </button>
+        <button class="btn" id="hackBtn">
+            Взломать
+        </button>
+    </main>
+</body>
+<script>
+    let cryptButton = document.getElementById('crypt')
+    let encryptButton = document.getElementById('encrypt')
+    let fileSelector = document.getElementById('file')
+    let hackButton = document.getElementById('hackBtn')
+
+    async function apiData(obj, strAPI) {
+        try{
+            let res = await fetch(strAPI,{
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(obj)
+            })
+            let result = await res.json()
+            return result
+        }
+        catch{
+            alert('Ошибка!')
+        }
+    }
+
+    hackButton.addEventListener('click', () => {
+        let textValue = document.getElementById("text").value
+        let textCipher = document.getElementById('textCrypt')
+
+        if (!textValue){
+            alert('Ошибка ввода данных! Введите пустые поля.')
+        } else{
+            let obj = {
+                'text': textValue,
+            }
+            let res = apiData(obj, '/caesar_hack')
+            res.then(value => {
+                if(value.status === 0){
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 1){
+                    textCipher.innerHTML = value.data
+                }
+            })
+
+        }
+    })
+
+    fileSelector.addEventListener('change', () => {
+        var fr=new FileReader();
+        fr.onload = function() {
+            document.getElementById('text')
+                .textContent=fr.result;
+        }
+        fr.readAsText(fileSelector.files[0]);
+    })
+
+    cryptButton.addEventListener('click', () => {
+        let keyValue = document.getElementById("key").value
+        let textValue = document.getElementById("text").value
+        let textCipher = document.getElementById('textCrypt')
+
+        if(!keyValue || !textValue){
+            alert('Ошибка ввода данных! Введите пустые поля.')
+        } else{
+            let obj = {
+                'key': keyValue,
+                'text': textValue
+            }
+            let res = apiData(obj, '/caesar_cipher')
+            res.then(value => {
+                if(value.status === 0){
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 1){
+                    textCipher.innerHTML = value.data
+                }
+            })
+
+        }
+    })
+
+    encryptButton.addEventListener('click', () => {
+        let keyValue = document.getElementById("key").value
+        let textValue = document.getElementById("text").value
+        let textCipher = document.getElementById('textCrypt')
+
+        if(!keyValue || !textValue){
+            alert('Ошибка ввода данных! Введите пустые поля.')
+        } else{
+            let obj = {
+                'key': keyValue,
+                'text': textValue,
+            }
+            let res = apiData(obj, '/caesar_decipher')
+            res.then(value => {
+                if(value.status === 0){
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 1){
+                    textCipher.innerHTML = value.data
+                }
+            })
+
+        }
+    })
+</script>
+</html>

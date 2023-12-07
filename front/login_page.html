@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index.css">
+    <title>Caesar</title>
+</head>
+<body>
+    <main>
+        <div class="key">
+            <p>Логин:</p>
+            <textarea  id="login" cols="50" rows="5"></textarea>
+        </div>
+        <div class="key">
+            <p>Пароль:</p>
+            <textarea  id="password" cols="50" rows="5"></textarea>
+        </div>
+        <button class="btn" id="enter">
+            Войти
+        </button>
+    </main>
+</body>
+<script>
+    let enterButton = document.getElementById('enter')
+
+    async function apiData(obj, strAPI) {
+        try{
+            let res = await fetch(strAPI,{
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(obj)
+            })
+            let result = await res.json()
+            return result
+        }
+        catch{
+            alert('Ошибка!')
+        }
+    }
+
+    enterButton.addEventListener('click', () => {
+        let login = document.getElementById('login').value
+        let password = document.getElementById('password').value
+
+        if(!login || !password){
+            alert('Ошибка ввода данных! Введите пустые поля.')
+        } else{
+            let obj = {
+                'login': login,
+                'password': password
+            }
+            let res = apiData(obj, '/client_login')
+            res.then(value => {
+                if(value.status === 'failed') {
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 'ok') {
+                    window.location.href = value.href
+                }
+            })
+
+        }
+    })
+</script>
+</html>

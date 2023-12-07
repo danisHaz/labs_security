@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index.css">
+    <title>Caesar</title>
+</head>
+<body>
+    <main>
+        <!-- <div class="language">
+            <p>Выберите язык:</p>
+            <select id="language">
+                <option value="ENG">ENG</option>
+                <option value="RUS">RUS</option>
+            </select>
+        </div> -->
+        <!-- <div className="inputText" class="text">
+            <p>Загрузить текст из файла:</p>
+            <input type="file" id="file"></input>
+        </div> -->
+        <div class="key">
+            <p>Введите строку:</p>
+            <textarea  id="str" cols="50" rows="5"></textarea>
+        </div>
+        <div class="key">
+            <p>Введите ключ:</p>
+            <textarea  id="key" cols="50" rows="5"></textarea>
+        </div>
+        <!-- <div class="text">
+            <p>Введите текст для шифрования:</p>
+            <textarea id="text" cols="60" rows="5" disabled></textarea>
+        </div> -->
+        <div class="text">
+            <p>Результат:</p>
+            <textarea id="textCrypt" cols="60" rows="5" disabled></textarea>
+        </div>
+        <!-- <div class="text">
+            <p>Ключ (после попытки взлома):</p>
+            <textarea id="keyHacked" cols="60" rows="5" disabled></textarea>
+        </div>
+        <div class="text">
+            <p>Результат расшифрования (после попытки взлома):</p>
+            <textarea id="resultHacked" cols="60" rows="5" disabled></textarea>
+        </div> -->
+        <button class="btn" id="crypt">
+            Зашифровать
+        </button>
+        <button class="btn" id="encrypt">
+            Расшифровать
+        </button>
+        <!-- <button class="btn" id="generateKey">
+            Сгенерировать ключ
+        </button> -->
+        <!-- <button class="btn" id="hack">
+            Взломать
+        </button> -->
+    </main>
+</body>
+<script>
+    let cryptButton = document.getElementById('crypt')
+    let encryptButton = document.getElementById('encrypt')
+    // let generateKey = document.getElementById('generateKey')
+    // let fileSelector = document.getElementById('file')
+    // let hackButton = document.getElementById('hack')
+
+    async function apiData(obj, strAPI) {
+        try{
+            let res = await fetch(strAPI,{
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(obj)
+            })
+            let result = await res.json()
+            return result
+        }
+        catch{
+            alert('Ошибка!')
+        }
+    }
+
+    // fileSelector.addEventListener('change', () => {
+    //     let text = document.getElementById('text')
+        
+    //     var fr=new FileReader();
+    //     fr.readAsText(fileSelector.files[0]);
+    //     fr.onload = function() {
+    //         document.getElementById('text')
+    //             .innerHTML=fr.result;
+    //     }
+    // })
+
+    cryptButton.addEventListener('click', () => {
+        let keyValue = document.getElementById("key").value
+        let textValue = document.getElementById("str").value
+        let textCipher = document.getElementById('textCrypt')
+
+        if(!keyValue || !textValue){
+            alert('Ошибка ввода данных! Введите пустые поля.')
+        } else{
+            let obj = {
+                'key': keyValue,
+                'text': textValue,
+            }
+            let res = apiData(obj, '/binary_cipher')
+            res.then(value => {
+                if(value.status === 0){
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 1){
+                    textCipher.innerHTML = value.data
+                }
+            })
+
+        }
+    })
+
+    encryptButton.addEventListener('click', () => {
+        let keyValue = document.getElementById("key").value
+        let textValue = document.getElementById("str").value
+        let textCipher = document.getElementById('textCrypt')
+
+        if(!keyValue || !textValue){
+            alert('Ошибка ввода данных! Введите пустые поля.')
+        } else{
+            let obj = {
+                'key': keyValue,
+                'text': textValue,
+            }
+            let res = apiData(obj, '/binary_decipher')
+            res.then(value => {
+                if(value.status === 0){
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 1){
+                    textCipher.innerHTML = value.data
+                }
+            })
+
+        }
+    })
+
+    // generateKey.addEventListener('click', () => {
+    //     let key = document.getElementById('key')
+    //     let str = document.getElementById('str').value
+    //     let obj = {
+    //         'keyLen': str
+    //     }
+    //     let res = apiData(obj, '/binary_generate')
+    //     res.then(value => {
+    //         if(value.status === 0){
+    //             alert('Что-то пошло не так!')
+    //         }
+    //         if(value.status === 1){
+    //             key.innerHTML = value.data
+    //         }
+    //     })
+    // })
+
+    // hackButton.addEventListener('click', () => {
+    //     let textValue = document.getElementById("textCrypt").value
+    //     let langField = document.getElementById('language').value == 'ENG' ? 'en' : 'ru'
+    //     let keyHack = document.getElementById('keyHacked')
+    //     let resultHack = document.getElementById('resultHacked')
+
+    //     if(!textValue){
+    //         alert('Ошибка ввода данных! Введите пустые поля.')
+    //     } else {
+    //         let obj = {
+    //             'text': textValue,
+    //             'lang': langField,
+    //         }
+    //         let res = apiData(obj, '/vizhener_hack')
+    //         res.then(value => {
+    //             if(value.status === 0){
+    //                 alert('Что-то пошло не так!')
+    //             }
+    //             if(value.status === 1){
+    //                 resultHack.innerHTML = value.data
+    //                 keyHack.innerHTML = value.key
+    //             }
+    //         })
+
+    //     }
+    // })
+</script>
+</html>

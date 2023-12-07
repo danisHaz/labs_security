@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index.css">
+    <title>Caesar</title>
+</head>
+<body>
+    <main>
+        <!-- <div class="language">
+            <p>Выберите язык:</p>
+            <select id="language">
+                <option value="ENG">ENG</option>
+                <option value="RUS">RUS</option>
+            </select>
+        </div> -->
+        <!-- <div className="inputText" class="text">
+            <p>Загрузить текст из файла:</p>
+            <input type="file" id="file"></input>
+        </div> -->
+        <div class="key">
+            <p>Введите битность ключа:</p>
+            <textarea  id="bit_count" cols="50" rows="5"></textarea>
+        </div>
+        <div class="key">
+            <p>Введите p:</p>
+            <textarea  id="p" cols="50" rows="5"></textarea>
+        </div>
+        <div class="key">
+            <p>Введите q:</p>
+            <textarea  id="q" cols="50" rows="5"></textarea>
+        </div>
+        <div class="key">
+            <p>Введите e:</p>
+            <textarea  id="e" cols="50" rows="5"></textarea>
+        </div>
+        <div class="key">
+            <p>Введите d:</p>
+            <textarea  id="d" cols="50" rows="5"></textarea>
+        </div>
+        <div class="key">
+            <p>Введите phi(N):</p>
+            <textarea  id="phi" cols="50" rows="5"></textarea>
+        </div>
+        <div class="key">
+            <p>Введите N:</p>
+            <textarea  id="N" cols="50" rows="5"></textarea>
+        </div>
+        <!-- <div class="text">
+            <p>Введите текст для шифрования:</p>
+            <textarea id="text" cols="60" rows="5" disabled></textarea>
+        </div> -->
+        <div class="text">
+            <p>Исходный текст:</p>
+            <textarea id="text" cols="60" rows="5"></textarea>
+        </div>
+        <div class="text">
+            <p>Криптограмма:</p>
+            <textarea id="cryptogramm" cols="60" rows="5"></textarea>
+        </div>
+        <div class="text">
+            <p>Результат:</p>
+            <textarea id="textCrypt" cols="60" rows="5" disabled></textarea>
+        </div>
+        <div class="text">
+            <p>Взломанное d:</p>
+            <textarea id="hackedD" cols="60" rows="5" disabled></textarea>
+        </div>
+        <div class="text">
+            <p>Взломанный результат:</p>
+            <textarea id="hackedResult" cols="60" rows="5" disabled></textarea>
+        </div>
+        <!-- <div class="text">
+            <p>Ключ (после попытки взлома):</p>
+            <textarea id="keyHacked" cols="60" rows="5" disabled></textarea>
+        </div>
+        <div class="text">
+            <p>Результат расшифрования (после попытки взлома):</p>
+            <textarea id="resultHacked" cols="60" rows="5" disabled></textarea>
+        </div> -->
+        <button class="btn" id="generate">
+            Сгенерировать ключи
+        </button>
+        <button class="btn" id="crypt">
+            Зашифровать
+        </button>
+        <button class="btn" id="encrypt">
+            Расшифровать
+        </button>
+        <button class="btn" id="hack">
+            Взломать
+        </button>
+        <!-- <button class="btn" id="generateKey">
+            Сгенерировать ключ
+        </button> -->
+        <!-- <button class="btn" id="hack">
+            Взломать
+        </button> -->
+    </main>
+</body>
+<script>
+    let cryptButton = document.getElementById('crypt')
+    let encryptButton = document.getElementById('encrypt')
+    let generateButton = document.getElementById('generate')
+    let hackButton = document.getElementById('hack')
+
+    async function apiData(obj, strAPI) {
+        try{
+            let res = await fetch(strAPI,{
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(obj)
+            })
+            let result = await res.json()
+            return result
+        }
+        catch{
+            alert('Ошибка!')
+        }
+    }
+
+    cryptButton.addEventListener('click', () => {
+        let e = document.getElementById('e').value
+        let N = document.getElementById('N').value
+        let textValue = document.getElementById('text').value
+        let bit_count = document.getElementById('bit_count').value
+        let cryptogramm = document.getElementById('cryptogramm')
+
+        if(!e || !N || !textValue || !bit_count){
+            alert('Ошибка ввода данных! Введите пустые поля.')
+        } else{
+            let obj = {
+                'e': e,
+                'N': N,
+                'bit_count': bit_count,
+                'text': textValue,
+            }
+            let res = apiData(obj, '/rsa_cipher')
+            res.then(value => {
+                if(value.status === 0) {
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 1) {
+                    cryptogramm.value = value.data
+                }
+            })
+
+        }
+    })
+
+    encryptButton.addEventListener('click', () => {
+        let d = document.getElementById("d").value
+        let N = document.getElementById("N").value
+        let text = document.getElementById('textCrypt')
+        let bit_count = document.getElementById('bit_count').value
+        let cryptogramm = document.getElementById('cryptogramm').value
+
+        if(!d || !N || !bit_count || !cryptogramm){
+            alert('Ошибка ввода данных! Введите пустые поля.')
+        } else{
+            let obj = {
+                'd': d,
+                'N': N,
+                'bit_count': bit_count,
+                'ciphered': cryptogramm
+            }
+            let res = apiData(obj, '/rsa_decipher')
+            res.then(value => {
+                if(value.status === 0){
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 1){
+                    text.value = value.data
+                }
+            })
+
+        }
+    })
+
+    generateButton.addEventListener('click', () => {
+        let bit_count = document.getElementById('bit_count').value
+        let p = document.getElementById('p')
+        let q = document.getElementById('q')
+        let e = document.getElementById('e')
+        let d = document.getElementById('d')
+        let phi = document.getElementById('phi')
+        let N = document.getElementById('N')
+
+        obj = {
+            'bit_count': bit_count, 
+        }
+
+        let res = apiData(obj, '/rsa_generate')
+
+        res.then(value => {
+            if(value.status === 0){
+                alert('Что-то пошло не так!')
+            }
+            if(value.status === 1){
+                p.value = value.p
+                q.value = value.q
+                e.value = value.e
+                d.value = value.d
+                phi.value = value.phi
+                N.value = value.N
+            }
+        })
+    })
+
+    hackButton.addEventListener('click', () => {
+        let e = document.getElementById('e').value
+        let cryptogramm = document.getElementById('cryptogramm').value
+        let N = document.getElementById('N').value
+        let hackedD = document.getElementById('hackedD')
+        let hackedResult= document.getElementById('hackedResult')
+        
+        obj = {
+            'ciphered': cryptogramm,
+            'e': e,
+            'N': N
+        }
+
+        let res = apiData(obj, '/rsa_hack')
+
+        res.then(value => {
+            if(value.status === 0){
+                alert('Что-то пошло не так!')
+            }
+            if(value.status === 1){
+                hackedD.value = value.d
+                hackedResult.value = value.deciphered 
+            }
+        })
+    })
+</script>
+</html>

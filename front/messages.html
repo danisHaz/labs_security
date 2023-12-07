@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./index.css">
+    <title>Caesar</title>
+</head>
+<body>
+    <main>
+        <div class="key">
+            <p>Сообщения:</p>
+            <textarea  id="login" cols="50" rows="5"></textarea>
+        </div>
+        <div class="key">
+            <p>Написать сообщение:</p>
+            <textarea  id="messageBox" cols="50" rows="5"></textarea>
+        </div>
+        <button class="btn" id="enter">
+            Отправить
+        </button>
+    </main>
+</body>
+<script>
+    let enterButton = document.getElementById('enter')
+
+    async function apiData(obj, strAPI, methodType='POST') {
+        try{
+            let res = await fetch(strAPI,{
+                method: methodType,
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(obj)
+            })
+            let result = await res.json()
+            return result
+        }
+        catch{
+            alert('Ошибка!')
+        }
+    }
+
+    const messageListener = new Promise((resolve, reject) => {
+        while (true) {
+            let res = apiData({}, '/check_messages', methodType='GET')
+            res.then(value => {
+                if(value.status === 'failed') {
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 'ok') {
+                    alert(value.message)
+                }
+            })
+            setTimeout(() => {}, 500)
+        }
+    })
+
+    enterButton.addEventListener('click', () => {
+        let message = document.getElementById('messageBox').value
+
+        if(!message){
+            alert('Ошибка ввода данных! Введите пустые поля.')
+        } else{
+            let obj = {
+                'message': message,
+            }
+            let res = apiData(obj, '/send_message')
+            res.then(value => {
+                if(value.status === 'failed') {
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 'ok') {
+                    alert('каеф')
+                }
+            })
+
+        }
+    })
+</script>
+</html>
