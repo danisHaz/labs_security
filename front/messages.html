@@ -97,7 +97,12 @@
     };
 
     socket.onmessage = function(event) {
-      alert("Получены данные " + event.data);
+    //   alert("Получены данные " + event.data);
+        let box = document.getElementById('messages')
+        box.innerHTML += 
+        `
+            <div class="message">${event.data}</div>   
+        `
     };
 
     enterButton.addEventListener('click', () => {
