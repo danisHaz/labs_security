@@ -13,7 +13,7 @@ from flask import Flask, request
 import json
 
 class Server:
-    def __init__(self, db: DatabaseManager, hostname='localhost', port=15001, max_connections=10) -> None:
+    def __init__(self, db: DatabaseManager, hostname='localhost', port=15002, max_connections=10) -> None:
         self.database = db
         self.__connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__hostname = hostname
@@ -73,7 +73,10 @@ class Server:
             buffer = connection.recv(1024)
             # time.sleep(1)
             if len(buffer) > 0:
-                self._on_message(pickle.loads(buffer), connection, address)
+                try:
+                    self._on_message(pickle.loads(buffer), connection, address)
+                except:
+                    print(bytes.decode(buffer, encoding='utf-8'))
 
     def send_message_to_client(self, message: str) -> None:
         encrypted_message = rc4([self.__diffie_key], message)
@@ -263,7 +266,7 @@ def send_message():
 
     return json.dumps(result)
 
-@app.route('/check_messages', methods=['GET'])
+@app.route('/check_messages', methods=['POST'])
 def check_new_messages():
     new_messages = server.retrieve_messages()
 

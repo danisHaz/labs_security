@@ -12,10 +12,6 @@
         <div class="key">
             <p>Сообщения:</p>
             <div id="messages">
-                <div class="message">Привет!</div>
-                <div class="message">Привет! Меня зовут Катя Привет! Меня зовут Катя Привет! Меня зовут Катя</div>
-                <div class="message">Привет!</div>
-                <div class="message">Привет!</div>
             </div>
         </div>
         <div class="key">
@@ -30,93 +26,104 @@
 <script>
     let enterButton = document.getElementById('enter')
 
-    // async function apiData(obj, strAPI, methodType='POST') {
-    //     try{
-    //         let res = await fetch(strAPI,{
-    //             method: methodType,
-    //             headers:{
-    //                 'Content-Type': 'application/json'
-    //             },
-    //             body: JSON.stringify(obj)
-    //         })
-    //         let result = await res.json()
-    //         return result
-    //     }
-    //     catch{
-    //         alert('Ошибка!')
-    //     }
-    // }
-
-    // const messageListener = new Promise((resolve, reject) => {
-    //     while (true) {
-    //         let res = apiData({}, '/check_messages', methodType='GET')
-    //         res.then(value => {
-    //             if(value.status === 'failed') {
-    //                 alert('Что-то пошло не так!')
-    //             }
-    //             if(value.status === 'ok') {
-    //                 alert(value.message)
-    //             }
-    //         })
-    //         setTimeout(() => {}, 500)
-    //     }
-    // })
-
-    // enterButton.addEventListener('click', () => {
-    //     let message = document.getElementById('messageBox').value
-
-    //     if(!message){
-    //         alert('Ошибка ввода данных! Введите пустые поля.')
-    //     } else{
-    //         let obj = {
-    //             'message': message,
-    //         }
-    //         let res = apiData(obj, '/send_message')
-    //         res.then(value => {
-    //             if(value.status === 'failed') {
-    //                 alert('Что-то пошло не так!')
-    //             }
-    //             if(value.status === 'ok') {
-    //                 alert('каеф')
-    //             }
-    //         })
-
-    //     }
-    // })
-    const soket = new WebSocket('ws://127.0.0.1:5501/front/messages.html')
-    socket.onopen = function() {
-        alert("Соединение установлено.");
-    };
-    socket.onclose = function(event) {
-        if (event.wasClean) {
-          alert('Соединение закрыто чисто');
-        } else {
-          alert('Обрыв соединения'); // например, "убит" процесс сервера
+    async function apiData(obj, strAPI, methodType='POST') {
+        try{
+            let res = await fetch(strAPI,{
+                method: methodType,
+                headers:{
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(obj)
+            })
+            let result = await res.json()
+            return result
         }
-        alert('Код: ' + event.code + ' причина: ' + event.reason);
-    };
+        catch{
+            alert('Ошибка!')
+        }
+    }
 
-    socket.onmessage = function(event) {
-    //   alert("Получены данные " + event.data);
-        let box = document.getElementById('messages')
-        box.innerHTML += 
-        `
-            <div class="message">${event.data}</div>   
-        `
-    };
+    setInterval(
+        () => {
+            let res = apiData({}, '/check_messages')
+            res.then(value => {
+                if(value.status === 'failed') {
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 'ok') {
+                    let box = document.getElementById('messages')
+
+                    if (value.messages.length != 0) {
+                        alert('Вам пришли новые сообщения!')
+                    }
+
+                    for (const message of value.messages) {
+                        box.innerHTML +=
+                            `
+                                <div class="message">${message}</div>   
+                            `
+                    }
+                }
+            })
+        }, 500
+    )
 
     enterButton.addEventListener('click', () => {
-        let mes = document.getElementById('messageBox').value
-        if(!mes){
-            alert('Невозможно отправить пустое сообщение')
+        let message = document.getElementById('messageBox').value
+
+        if(!message){
+            alert('Ошибка ввода данных! Введите пустые поля.')
         } else{
-            socket.send(mes);
+            let obj = {
+                'message': message,
+            }
+            let res = apiData(obj, '/send_message')
+            res.then(value => {
+                if(value.status === 'failed') {
+                    alert('Что-то пошло не так!')
+                }
+                if(value.status === 'ok') {
+                    console.log('message sent')
+                }
+            })
+
         }
     })
+    // const socket = new WebSocket('ws://127.0.0.1:15002')
+    // socket.onopen = function() {
+    //     alert("Соединение установлено.");
+    // };
+    // socket.onclose = function(event) {
+    //     if (event.wasClean) {
+    //       alert('Соединение закрыто чисто');
+    //     } else {
+    //       alert('Обрыв соединения'); // например, "убит" процесс сервера
+    //     }
+    //     alert('Код: ' + event.code + ' причина: ' + event.reason);
+    // };
 
-    socket.onerror = function(error) {
-      alert("Ошибка " + error.message);
-    };
+    // socket.onmessage = function(event) {
+    // //   alert("Получены данные " + event.data);
+    //     let box = document.getElementById('messages')
+    //     box.innerHTML += 
+    //     `
+    //         <div class="message">${event.data}</div>   
+    //     `
+    // };
+
+    // enterButton.addEventListener('click', () => {
+    //     let mes = document.getElementById('messageBox').value
+    //     if(!mes){
+    //         alert('Невозможно отправить пустое сообщение')
+    //     } else{
+    //         console.log(mes);
+    //         socket.send(mes);
+    //     }
+    // })
+
+    // socket.onerror = function(error) {
+    //   alert("Ошибка " + error.message);
+    // };
 
 </script>
 </html>

@@ -12,13 +12,15 @@ from flask import Flask, request
 class Client:
     __max_timeout = 1e10
 
-    def __init__(self, host='localhost', port=15001) -> None:
+    def __init__(self, host='localhost', port=15002) -> None:
         self.__connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__host = host
         self.__port = port
 
         self.__diffie_key = None
         self.__diffie_B = None
+
+        self.message_buffer = []
 
     def connect(self):
         self.__connection.connect((self.__host, self.__port))
@@ -153,6 +155,7 @@ class Client:
             message = pickle.loads(message)
             decrypted_message = rc4([self.__diffie_key], message)
             print(decrypted_message)
+            self.message_buffer.append(decrypted_message)
 
 class Client_app:
     def __init__(self) -> None:
@@ -167,10 +170,14 @@ class Client_app:
 
     def start_messaging(self) -> None:
         self.__client.start_listening()
-        # self.__client.start_messaging()
 
     def send_message_to_server(self, message: str) -> None:
         self.__client.send_message(message)
+
+    def retrieve_new_messages(self) -> list:
+        new_messages = self.__client.message_buffer.copy()
+        self.__client.message_buffer.clear()
+        return new_messages
 
 app = Flask(__name__, template_folder='../front', static_folder='../front')
 app.config.from_object({
@@ -210,6 +217,14 @@ def send_message():
     client.send_message_to_server(message)
 
     result = {'status': 'ok'}
+
+    return json.dumps(result)
+
+@app.route('/check_messages', methods=['POST'])
+def check_new_messages():
+    new_messages = client.retrieve_new_messages()
+
+    result = {'status': 'ok', 'messages': new_messages}
 
     return json.dumps(result)
 
