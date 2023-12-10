@@ -21,7 +21,7 @@ class Config:
 
 class DatabaseManager:
     def __init__(self) -> None:
-        pass
+        self.users_table = 'security.users'
 
     def add_config(self, config_filepath: str) -> None:
         parser = configparser.ConfigParser()
@@ -43,7 +43,7 @@ class DatabaseManager:
     def get_data_from_table(self, query) -> np.ndarray:
         db = self.__require_not_none(self.__database)
         connection = db.connect()
-        result = np.array(connection.execute(query).fetchall())
+        result = np.array(connection.execute(sqlalchemy.text(query)).fetchall())
         connection.close()
         return result
 

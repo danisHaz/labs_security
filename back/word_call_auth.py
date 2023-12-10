@@ -2,7 +2,7 @@ from SHA1 import sha1
 from random import random, sample
 from rsa import rsa_encode, rsa_decode, generate_key
 
-def generate_secret_word(word_len=256):
+def generate_secret_word(word_len=64):
     secret = ''.join([
         chr(i) for i in sample(
             list(range(50, 130)) * 5,

@@ -27,6 +27,7 @@ class Server:
         self.__diffie_p = None
 
         self.__secret = None
+        self.__login = None
 
         self.message_buffer = []
 
@@ -64,6 +65,16 @@ class Server:
             return answer
 
         return None
+    
+    def check_if_user_exists(self, login: str) -> bool:
+        result = self.database.get_data_from_table(f'select * from {self.database.users_table} where login="{login}";')
+        if result is not None and len(result) != 0:
+            return True
+
+        return False
+    
+    def get_password_by_login(self, login: str) -> str:
+        return self.database.get_data_from_table(f'select password from {self.database.users_table} where login="{login}";')[0, 0]
 
     def _talk_to_client(self, connection: socket, address: tuple) -> None:
         while True:
@@ -135,8 +146,15 @@ class Server:
         # ret_connection.send(pickle.dumps(result))
 
     def _send_pass_check_begin(self, login, ret_connection) -> None:
-        # find login in database - if exists then send secret word
+        if self.check_if_user_exists(login) != True:
+            request = {
+                'type': 'pass_check_failed',
+            }
 
+            self.send(request, ret_connection)
+            return
+
+        self.__login = login
         self.__secret = generate_secret_word()
         hashed_secret = sha1(self.__secret)
 
@@ -160,19 +178,34 @@ class Server:
         ret_connection: socket
     ) -> None:
 
+        print(f'server: hashed_password={hashed_password}, encoded_hash={encoded_hash}')
+
         server_hashed_password, decoded_hash = unsign_data(hashed_password, encoded_hash, e, N)
 
-        print(f'server: hashed password = {hashed_password}, decoded hash = {decoded_hash}')
+        print(f'server: hashed password = {server_hashed_password}, decoded hash = {decoded_hash}')
 
         if server_hashed_password != decoded_hash:
+            request = {
+                'type': 'sess_keygen',
+                'status': 'failed',
+            }
+
+            self.send(request, ret_connection)
             return # someone changed our hashed password, aborting
 
-        password = 'password' # obtain real password from database
+        password = self.get_password_by_login(self.__login)
+
         server_hashed_password = sha1_combined(password, sha1(secret))
 
         print(f'server: local hashed password = {server_hashed_password}, client hashed password = {hashed_password}')
 
         if H != server_hashed_password:
+            request = {
+                'type': 'sess_keygen',
+                'status': 'failed',
+            }
+
+            self.send(request, ret_connection)
             return # provided wrong password, aborting
 
         self.__diffie_A, self.__diffie_p = generate_number(128), generate_prime_numbers(512, 1)[0]
@@ -220,7 +253,14 @@ class Server_app:
         self.__server_thread.start()
 
     def start_login(self, login: str, password: str) -> str:
-        # go to database
+        is_user_exists = self.__server.check_if_user_exists(login)
+        if not is_user_exists:
+            return 'failed'
+
+        db_password = self.__server.get_password_by_login(login)
+        if password != db_password:
+            return 'failed'
+
         return 'ok'
     
     def send_message(self, message: str) -> None:

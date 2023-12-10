@@ -60,3 +60,16 @@ textarea{
     margin: 0.4rem;
 }
 
+
+.myMessage{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex-wrap: wrap;
+
+    width: 50%;
+    border: 3px solid red;
+    border-radius: 10px;
+    padding: 0.4rem;
+    margin: 0.4rem;
+}

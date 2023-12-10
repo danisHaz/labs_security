@@ -56,7 +56,7 @@
             let res = apiData(obj, '/client_login')
             res.then(value => {
                 if(value.status === 'failed') {
-                    alert('Что-то пошло не так!')
+                    alert(value.reason)
                 }
                 if(value.status === 'ok') {
                     window.location.href = value.href

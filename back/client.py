@@ -103,6 +103,8 @@ class Client:
         self.send(request)
 
     def start_auth(self, login, password) -> tuple[str, str]:
+        self.__is_message_thread_working = False
+
         pass_check_result = self._send_login(login)
 
         if pass_check_result is None \
@@ -146,11 +148,12 @@ class Client:
             self.send_message(message)
 
     def start_listening(self):
+        self.__is_message_thread_working = True
         self.__message_thread = threading.Thread(target=Client._listen_to_messages, args=(self, self.__connection))
         self.__message_thread.start()
 
     def _listen_to_messages(self, ret_connection):
-        while True:
+        while self.__is_message_thread_working:
             message = ret_connection.recv(1024)
             message = pickle.loads(message)
             decrypted_message = rc4([self.__diffie_key], message)

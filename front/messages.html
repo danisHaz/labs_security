@@ -84,6 +84,11 @@
                 }
                 if(value.status === 'ok') {
                     console.log('message sent')
+                    let box = document.getElementById('messages')
+                    box.innerHTML +=
+                        `
+                            <div class="myMessage">${message}</div>   
+                        `
                 }
             })
 
